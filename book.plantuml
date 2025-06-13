@@ -1,0 +1,88 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class cache {
+   value: text
+   expiration: integer
+   key: varchar
+}
+class cache_locks {
+   owner: varchar
+   expiration: integer
+   key: varchar
+}
+class failed_jobs {
+   uuid: varchar
+   connection: text
+   queue: text
+   payload: text
+   exception: text
+   failed_at: datetime
+   id: integer
+}
+class job_batches {
+   name: varchar
+   total_jobs: integer
+   pending_jobs: integer
+   failed_jobs: integer
+   failed_job_ids: text
+   options: text
+   cancelled_at: integer
+   created_at: integer
+   finished_at: integer
+   id: varchar
+}
+class jobs {
+   queue: varchar
+   payload: text
+   attempts: integer
+   reserved_at: integer
+   available_at: integer
+   created_at: integer
+   id: integer
+}
+class migrations {
+   migration: varchar
+   batch: integer
+   id: integer
+}
+class password_reset_tokens {
+   token: varchar
+   created_at: datetime
+   email: varchar
+}
+class sessions {
+   user_id: integer
+   ip_address: varchar
+   user_agent: text
+   payload: text
+   last_activity: integer
+   id: varchar
+}
+class sqlite_master {
+   type: text
+   name: text
+   tbl_name: text
+   rootpage: int
+   sql: text
+}
+class sqlite_sequence {
+   name: unknown
+   seq: unknown
+}
+class users {
+   name: varchar
+   email: varchar
+   email_verified_at: datetime
+   password: varchar
+   remember_token: varchar
+   created_at: datetime
+   updated_at: datetime
+   id: integer
+}
+
+sessions               -[#595959,plain]-^  users                 : "user_id:id"
+@enduml
