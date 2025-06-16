@@ -2,15 +2,15 @@
 
 @section('content')
     {{ Breadcrumbs::render('book.edit') }}
-    @if (isset($book))
-        <form method="post" action="{{ route('books.update', ['book' => $book->id]) }}" enctype="multipart/form-data"
+    @if (isset($bookDetail))
+        <form method="post" action="{{ route('books.update', ['book' => $bookDetail->id]) }}" enctype="multipart/form-data"
             class="max-w-lg mx-auto bg-white p-6">
             @csrf
             @method('PUT')
             <p class="mb-10 text-3xl">Cập nhật sách</p>
             {{-- name --}}
             <div class="relative z-0 w-full mb-5 group">
-                <input type="text" name="name" id="name" value="{{ old('name', $book->name) }}"
+                <input type="text" name="name" id="name" value="{{ old('name', $bookDetail->name) }}"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     min="3" required />
                 <label for="name"
@@ -25,7 +25,7 @@
             </div>
             {{-- author --}}
             <div class="relative z-0 w-full mb-5 group">
-                <input type="text" name="author" id="author" value="{{ old('author', $book->author) }}"
+                <input type="text" name="author" id="author" value="{{ old('author', $bookDetail->author) }}"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     required />
                 <label for="author"
@@ -41,7 +41,7 @@
             {{-- published_at --}}
             <div class="relative z-0 w-full mb-5 group">
                 <input type="date" name="published_at" id="published_at"
-                    value="{{ old('published_at', $book->published_at) }}"
+                    value="{{ old('published_at', $bookDetail->published_at) }}"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     placeholder=" " required />
                 <label for="published_at"
@@ -59,7 +59,7 @@
                 <label for="categories" class="peer-focus:font-medium text-xs text-gray-500  duration-300 transform">
                     Thể loại
                 </label>
-                <x-dropdown name="categories" :options="$categories" :selected="old('categories') ?? $book->categoryIds" />
+                <x-dropdown name="categories" :options="$categories" :selected="old('categories') ?? $bookDetail->categoryIds" />
                 @error('categories')
                     <p class="mt-2 text-sm text-red-600 dark:text-red-500">
                         {{ $message }}
@@ -73,7 +73,7 @@
                 </label>
                 <textarea id="description" name="description" rows="8"
                     class="mt-4 p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
-                    placeholder="Mô tả nội dung sách." required>{{ old('description', $book->description) }}
+                    placeholder="Mô tả nội dung sách." required>{{ old('description', $bookDetail->description) }}
                 </textarea>
                 @error('description')
                     <p class="mt-2 text-sm text-red-600 dark:text-red-500">

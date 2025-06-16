@@ -12,9 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            // Use custom primary key instead of default id
+            $table->bigIncrements('category_id')->comment('Primary key of categories table');
+
+            $table->string('name')->comment('Category name');
+            $table->enum('status', ['active', 'inactive'])->default('active')->comment('Category status: active or inactive');
             $table->timestamps();
         });
     }

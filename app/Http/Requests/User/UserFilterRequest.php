@@ -9,6 +9,8 @@ class UserFilterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -23,7 +25,7 @@ class UserFilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'q' => 'string|max:255'
+            'keyword' => 'string|max:255'
         ];
     }
 }

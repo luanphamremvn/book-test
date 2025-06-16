@@ -15,7 +15,7 @@
                             </svg>
                         </div>
                         <input datepicker id="default-datepicker" type="text" name="published_at"
-                            value="{{ old('published_at', @$filters['published_at']) }}"
+                            value="{{ old('published_at', isset($filters['published_at']) ? $filters['published_at'] : '') }}"
                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 lg:min-w-[150px]"
                             placeholder="Ngày xuất bản">
                     </div>
@@ -47,7 +47,7 @@
                                             class="inline-flex w-full items-center px-4 py-2 hover:bg-gray-100 :hover:bg-gray-600">
                                             <input name="categories[]" type="checkbox" value="{{ $category->id }}"
                                                 class="w-4 h-4 mr-1.5 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
-                                                @checked(in_array($category->id, old('categories[]', @$filters['categories'] ?? [])))>
+                                                @checked(in_array($category->id, old('categories[]', isset($filters['categories']) ? $filters['categories'] : [])))>
                                             <span>{{ $category->name }}</span>
                                         </button>
                                     </li>
@@ -55,7 +55,7 @@
                             </ul>
                         </div>
                         <div class="relative w-full">
-                            <input type="search" id="search-dropdown" name="q" value="{{ old('q', @$filters['q']) }}"
+                            <input type="search" id="search-dropdown" name="keyword" value="{{ old('keyword', isset($filters['keyword']) ? $filters['keyword'] : '') }}"
                                 class="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg border-s-gray-50 border-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500  "
                                 placeholder="Tên sách, Tác giả, Mô tả ..." />
                             <button type="submit"
@@ -114,32 +114,32 @@
             </thead>
             <tbody>
                 @if ($data instanceof Illuminate\Pagination\LengthAwarePaginator && count($data) > 0)
-                    @foreach ($data as $item)
+                    @foreach ($data as $book)
                         <tr class="bg-white border-b  border-gray-200">
                             <th scope="row" class="px-4 py-4">
-                                <img src="{{ $item->imageUrl }}" class="sm:w-40 sm:h-28 max-w-32 h-20" />
+                                <img src="{{ $book->imageUrl }}" class="sm:w-40 sm:h-28 max-w-32 h-20" />
                             </th>
                             <th class="px-6 py-4">
-                                {{ $item->name }}
+                                {{ $book->name }}
                             </th>
                             <td class="px-6 py-4 max-w-[200px]">
-                                {{ $item->categoriesName }}
+                                {{ $book->categoriesName }}
                             </td>
                             <td class="px-3 py-4">
-                                {{ $item->author }}
+                                {{ $book->author }}
                             </td>
                             <td class="px-3 py-4">
-                                {{ $item->published_at }}
+                                {{ $book->published_at }}
                             </td>
                             <td class="px-3 py-4 lg:max-w-3xs">
-                                {{ $item->shortDescription }}
+                                {{ $book->shortDescription }}
                             </td>
                             <td class="px-3 py-4 min-w-48">
                                 <a type="button" href="{{ route('books.show', ['book' => $item->id]) }}"
                                     class="border-[0.5px] p-2 rounded-sm cursor-pointer text-white bg-blue-500 min-w-[60px] mr-1">
                                     Chỉnh sửa
                                 </a>
-                                <a href="#" onClick="deleteBook({{ $item->id }})" type="button"
+                                <a href="#" onClick="deleteBook({{ $book->id }})" type="button"
                                     data-modal-target="delete-book-modal" data-modal-toggle="delete-book-modal"
                                     class="border-[0.5px] p-2 rounded-sm cursor-pointer text-white bg-red-500 min-w-[60px]">
                                     Xoá
@@ -157,9 +157,9 @@
             </tbody>
         </table>
         {{-- pagination links --}}
-        @if ($data instanceof LengthAwarePaginator)
+        @if ($books instanceof LengthAwarePaginator)
             <div class="mt-3">
-                {!! $data->links() !!}
+                {!! $books->links() !!}
             </div>
         @endif
     </div>

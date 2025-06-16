@@ -8,46 +8,48 @@ use App\Http\Requests\User\UserRequest;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View as ViewAlias;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 
 class UserController extends Controller
 {
-
     public function __construct(protected UserService $userService) {}
     /**
      * show the list of users
      * @param UserFilterRequest $request
-     * @return ViewAlias
+     * @return View
      * @throws Exception
      */
-    public function index(UserFilterRequest $request): ViewAlias
+    public function index(UserFilterRequest $request): View
     {
         try {
-            $filters = $request->only(['q']);
-            $data = $this->userService->getAllUser($filters);
+            $filters = $request->only(['keyword']);
+            $users = $this->userService->getAllUser($filters);
 
-            return view('pages.user.index', ['data' => $data, 'filters' => $filters]);
-        } catch (Exception $e) {
+            return view('pages.user.index', [
+                'data' => $users,
+                'filters' => $filters
+            ]);
+        } catch (Exception $exception) {
             // Log the error message
             $this->logError(LOG_GET_ALL_USER, 'Get users error', [
-                'message' => $e->getMessage(),
+                'message' => $exception->getMessage(),
                 'request' => $request->all(),
             ]);
 
             return view('pages.user.index', [
-                'data' => [],
-                'filters' => $request->only(['q']),
+                'users' => [],
+                'filters' => $request->only(['keyword']),
             ])->with(['errorMessage' => 'Lỗi hệ thống, vui lòng thử lại sau']);
         }
     }
 
     /**
      * Show the form for creating a new resource.
-     * @return ViewAlias|Application|Factory
+     * @return View|Application|Factory
      */
-    public function create(): ViewAlias|Application|Factory
+    public function create(): View|Application|Factory
     {
         return view('pages.user.create');
     }
@@ -61,18 +63,19 @@ class UserController extends Controller
     {
         try {
             $data = $request->only(['name', 'password', 'username', 'email']);
+
             //create user
             $user = $this->userService->createUser($data);
 
             if ($user) {
                 return redirect()->route('users.index')->with('success', 'Thêm user thành công');
-            } else {
-                return redirect()->back()->with('error', 'Tạo user thất bại! vui lòng thử lại sau');
             }
-        } catch (Exception $e) {
+
+            return redirect()->back()->with('error', 'Tạo user thất bại! vui lòng thử lại sau');
+        } catch (Exception $exception) {
             // Log the error message
             $this->logError(LOG_CREATE_USER, 'Create user error', [
-                'message' => $e->getMessage(),
+                'message' => $exception->getMessage(),
                 'request' => $request->all(),
             ]);
 

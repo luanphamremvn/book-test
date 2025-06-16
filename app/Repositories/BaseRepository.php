@@ -5,24 +5,20 @@ namespace App\Repositories;
 use App\Repositories\Interfaces\BaseRepositoryInterface;
 use App\Traits\LogTrait;
 use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-
-/**
- * @property $with
- */
 abstract class BaseRepository implements BaseRepositoryInterface
 {
-
     use LogTrait;
+
     /**
      * The repository model
      *
      * @var Model
      */
     protected Model $model;
-
 
     /**
      * The query builder
@@ -43,21 +39,27 @@ abstract class BaseRepository implements BaseRepositoryInterface
      *
      * @var array
      */
-    protected array $whereIns = array();
+    protected array $whereIns = [];
 
     /**
      * Array of or more where
      *
      * @var array
      */
-    protected array $wheres = array();
+    protected array $wheres = [];
 
     /**
      *
      * @var array
      */
-    protected array $orderBys = array();
+    protected array $orderBys = [];
 
+    /**
+     * Array of eager loading relations.
+     *
+     * @var array
+     */
+    protected array $with = [];
 
     /**
      * Get all the model records in the database
@@ -67,9 +69,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     public function all(): Collection
     {
         $this->newQuery();
-
         $models = $this->query->get();
-
         $this->unsetClauses();
 
         return $models;
@@ -93,14 +93,18 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Delete one or more model records from the database
      *
-     * @return mixed
+     * @return int|false
      */
-    public function delete(): mixed
+    public function delete(): int|false
     {
         $this->newQuery()->setClauses();
+        // Prevent deleting all records if no where or whereIn is set
+        if (empty($this->wheres) && empty($this->whereIns)) {
+            $this->unsetClauses();
+            return false;
+        }
 
         $result = $this->query->delete();
-
         $this->unsetClauses();
 
         return $result;
@@ -110,30 +114,26 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Delete the specified model record from the database
      *
-     * @param $id
-     *
+     * @param int|string $id
      * @return bool|null
      * @throws Exception
      */
-    public function deleteById($id): ?bool
+    public function deleteById(int|string $id): ?bool
     {
         $this->unsetClauses();
 
-        return $this->FindById($id)->delete();
+        return $this->findById($id)->delete();
     }
 
 
     /**
      * Get the first specified model record from the database
-     *
      * @return Model
      */
     public function first(): Model
     {
         $this->newQuery()->setClauses();
-
         $model = $this->query->firstOrFail();
-
         $this->unsetClauses();
 
         return $model;
@@ -148,9 +148,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     public function get(): Collection
     {
         $this->newQuery()->setClauses();
-
         $models = $this->query->get();
-
         $this->unsetClauses();
 
         return $models;
@@ -160,14 +158,12 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Get the specified model record from the database
      *
-     * @param $id
-     *
+     * @param int|string $id
      * @return Model
      */
-    public function findById($id): Model
+    public function findById(int|string $id): Model
     {
         $this->unsetClauses();
-
         $this->newQuery();
 
         return $this->query->findOrFail($id);
@@ -177,17 +173,15 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Update the specified model record in the database
      *
-     * @param $id
+     * @param int|string $id
      * @param array $data
      *
      * @return Model
      */
-    public function updateById($id, array $data): Model
+    public function updateById(int|string $id, array $data): Model
     {
         $this->unsetClauses();
-
         $model = $this->findById($id);
-
         $model->update($data);
 
         return $model;
@@ -200,10 +194,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * @param string $column
      * @param string $value
      * @param string $operator
-     *
      * @return $this
      */
-    public function where($column, $value, $operator = '='): static
+    public function where(string $column,string $value,string $operator = '='): static
     {
         $this->wheres[] = compact('column', 'value', 'operator');
 
@@ -215,18 +208,44 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * Add a simple where in clause to the query
      *
      * @param string $column
-     * @param mixed  $values
-     *
+     * @param array|mixed  $values
      * @return $this
      */
-    public function whereIn($column, mixed $values): static
+    public function whereIn(string $column, mixed $values): static
     {
         $values = is_array($values) ? $values : array($values);
-
         $this->whereIns[] = compact('column', 'values');
 
         return $this;
     }
+
+    /**
+     * Add an order by clause to the query.
+     *
+     * @param string $column
+     * @param string $direction
+     * @return $this
+     */
+    public function orderBy(string $column, string $direction = 'asc'): static
+    {
+        $this->orderBys[] = compact('column', 'direction');
+
+        return $this;
+    }
+
+    /**
+     * Set eager loading relations.
+     *
+     * @param array $relations
+     * @return $this
+     */
+    public function with(array $relations): static
+    {
+        $this->with = $relations;
+
+        return $this;
+    }
+
 
     /**
      * Create a new instance of the model's query builder
@@ -236,6 +255,10 @@ abstract class BaseRepository implements BaseRepositoryInterface
     protected function newQuery(): static
     {
         $this->query = $this->model->newQuery();
+
+        if (!empty($this->with)) {
+            $this->query->with($this->with);
+        }
 
         return $this;
     }
@@ -270,26 +293,47 @@ abstract class BaseRepository implements BaseRepositoryInterface
      */
     protected function unsetClauses(): static
     {
-        $this->wheres   = array();
-        $this->whereIns = array();
+        $this->wheres   = [];
+        $this->whereIns = [];
+        $this->orderBys = [];
+        $this->with     = [];
 
         return $this;
     }
 
     /**
+     * Count the number of records matching the given columns and clauses.
+     *
      * @param array $columns
      * @return int
      */
     public function count($columns = []): int
     {
-        $this->unsetClauses();
-
-        $this->newQuery();
+        $this->newQuery()->setClauses();
 
         foreach ($columns as $column => $value) {
             $this->query->where($column, $value);
         }
 
-        return $this->query->count();
+        $count = $this->query->count();
+        $this->unsetClauses();
+
+        return $count;
+    }
+
+    /**
+     * Paginate the results.
+     *
+     * @param int $perPage
+     * @param array $columns
+     * @return LengthAwarePaginator
+     */
+    public function paginate(int $perPage = PAGINATION_PER_PAGE, array $columns = ['*']): LengthAwarePaginator
+    {
+        $this->newQuery()->setClauses();
+        $paginator = $this->query->paginate($perPage, $columns);
+        $this->unsetClauses();
+
+        return $paginator;
     }
 }

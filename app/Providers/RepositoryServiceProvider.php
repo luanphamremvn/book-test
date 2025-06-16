@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Providers;
 
 use App\Repositories\BookCategoriesRepository;
@@ -11,10 +12,12 @@ use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 use Illuminate\Support\ServiceProvider;
 
-class BiddingServiceProvider extends ServiceProvider {
-
-     /**
+class RepositoryServiceProvider extends ServiceProvider
+{
+    /**
      * Register any application services.
+     *
+     * @return void
      */
     public function register(): void
     {
@@ -26,6 +29,8 @@ class BiddingServiceProvider extends ServiceProvider {
 
     /**
      * Bootstrap any application services.
+     *
+     * @return void
      */
     public function boot(): void
     {

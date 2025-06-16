@@ -50,17 +50,17 @@
                 </tr>
             </thead>
             <tbody>
-                @if (count($data) > 0)
-                    @foreach ($data as $item)
+                @if (count($users) > 0)
+                    @foreach ($users as $user)
                         <tr class="bg-white border-b  border-gray-200">
                             <th class="px-6 py-4">
-                                {{ $item->name }}
+                                {{ $user->name }}
                             </th>
                             <td class="px-6 py-4 max-w-[200px]">
-                                {{ $item->username }}
+                                {{ $user->username }}
                             </td>
                             <td class="px-3 py-4">
-                                {{ $item->email }}
+                                {{ $user->email }}
                             </td>
 
                         </tr>
@@ -75,9 +75,9 @@
             </tbody>
         </table>
         {{-- pagination links --}}
-        @if ($data instanceof LengthAwarePaginator)
+        @if ($users instanceof LengthAwarePaginator)
             <div class="mt-3">
-                {!! $data->links() !!}
+                {!! $users->links() !!}
             </div>
         @endif
     </div>

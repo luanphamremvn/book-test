@@ -14,7 +14,8 @@ class UserService extends BaseService
     public function __construct(protected UserRepository $repository) {}
 
     /**
-     * Summary of getAllUser
+     * Get all users with pagination and filters
+     *
      * @param array $filters
      * @return LengthAwarePaginator
      * @throws Exception
@@ -23,13 +24,15 @@ class UserService extends BaseService
     {
         try {
             return $this->repository->getAllUser($filters);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             // Log the error message
             $this->logError(LOG_GET_ALL_USER, 'Get all users error', [
                 'filters' => $filters,
-                'message' => $e->getMessage()
+                'message' => $exception->getMessage()
             ]);
-            throw new Exception('Error retrieving users', $e->getCode(), $e);
+
+            // Throw a new exception with a detailed message
+            throw new Exception('Error retrieving users', $exception->getCode(), $exception);
         }
     }
 
@@ -44,18 +47,66 @@ class UserService extends BaseService
     {
         try {
             $user = null;
+
+            // Validate the data before creating the user
             DB::transaction(function () use ($data, &$user) {
                 $user = $this->repository->create($data);
             });
 
             return $user;
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             $this->logError(LOG_CREATE_USER, 'Create user error', [
                 'data' => $data,
-                'message' => $e->getMessage()
+                'message' => $exception->getMessage()
             ]);
 
-            throw new Exception('Error creating user', $e->getCode(), $e);
+            throw new Exception('Error creating user', $exception->getCode(), $exception);
+        }
+    }
+
+    /**
+     * Login user with given credentials
+     *
+     * @param array $data
+     * @return bool|null
+     * @throws Exception
+     */
+    public function loginUser(array $data): bool|null
+    {
+        try {
+            $user = $this->repository->loginUser($data);
+
+            if (!$user) {
+                throw new Exception('Invalid credentials');
+            }
+
+            // Optionally, you can handle any additional logic after successful login
+            return $user;
+        } catch (Exception $exception) {
+            $this->logError(LOG_USER_LOGIN, 'Login user error', [
+                'data' => $data,
+                'message' => $exception->getMessage()
+            ]);
+
+            throw new Exception('Error logging in user', $exception->getCode(), $exception);
+        }
+    }
+    /**
+     * Logout user
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function logoutUser(): void
+    {
+        try {
+            $this->repository->logoutUser();
+        } catch (Exception $exception) {
+            $this->logError(LOG_USER_LOGOUT, 'Logout user error', [
+                'message' => $exception->getMessage()
+            ]);
+
+            throw new Exception('Error logging out user', $exception->getCode(), $exception);
         }
     }
 }

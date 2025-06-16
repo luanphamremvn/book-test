@@ -9,6 +9,8 @@ class BookFilterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -16,7 +18,7 @@ class BookFilterRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get the validation rules that apply to the filter request.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -24,7 +26,7 @@ class BookFilterRequest extends FormRequest
     {
 
         return [
-            'q' => 'nullable|string|max:255',
+            'keyword' => 'nullable|string|max:255',
             'published_at' => 'nullable|date|string',
             'categories' => 'nullable|array',
             'categories.*' => 'integer',
@@ -32,14 +34,14 @@ class BookFilterRequest extends FormRequest
     }
 
     /**
-     * Get custom messages for validator errors.
+     * Get custom error messages for validator failures.
      *
-     * @return array
+     * @return array<string, string>
      */
     public function messages(): array
     {
         return [
-            'q.max' => 'Bạn chỉ có thể tìm kiếm tối đa 255 ký tự',
+            'keyword.max' => 'Bạn chỉ có thể tìm kiếm tối đa 255 ký tự',
             'published_at.string' => 'Ngày xuất bản phải là một chuỗi hợp lệ',
             'published_at.date' => 'Ngày xuất bản phải là một ngày hợp lệ',
             'categories.array' => 'Thể loại phải là một mảng hợp lệ',

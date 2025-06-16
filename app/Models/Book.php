@@ -7,24 +7,39 @@ use App\Services\UploadFileService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Application;
 
 /**
- * @property mixed $categoryIds
- * @property mixed $categories
- * @property mixed $description
- * @property mixed $image
- * @property mixed $id
+ * @property array $categoryIds
+ * @property string $description
+ * @property string $image
+ * @property int $id
+ * @property BelongsToMany $categories
  */
 class Book extends Model
 {
-    protected mixed $uploadFileService;
+    use HasFactory;
+    /**
+     * The service for handling file uploads.
+     *
+     * @var UploadFileService|Application|object
+     */
+    protected UploadFileService $uploadFileService;
 
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-        $this->uploadFileService = app(UploadFileService::class);
-    }
+    /**
+     * The table associated with the model.
+     *
+     * @var string $primaryKey
+     */
+    protected $primaryKey = 'book_id';
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string[] $fillable
+     */
     protected $fillable = [
         'name',
         'slug',
@@ -34,13 +49,26 @@ class Book extends Model
         'image'
     ];
 
-    public function Categories(): BelongsToMany
+    public function __construct(array $attributes = [])
+    {
+        $this->uploadFileService = app(UploadFileService::class);
+        parent::__construct($attributes);
+    }
+
+    /**
+     * Define the relationship between Book and Category models.
+     *
+     * @return BelongsToMany
+     */
+    public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'book_categories');
     }
 
     /**
-     * Get image
+     * Retrieve the image URL; if no image is available, use the default image.
+     *
+     * @return Attribute
      */
     protected function imageUrl(): Attribute
     {
@@ -49,6 +77,11 @@ class Book extends Model
         );
     }
 
+    /**
+     * Get a shortened version of the book description, limited to 150 characters.
+     *
+     * @return Attribute
+     */
     public function shortDescription(): Attribute
     {
         return Attribute::make(
@@ -56,6 +89,11 @@ class Book extends Model
         );
     }
 
+    /**
+     * get all the category names of the book separated by commas
+
+     * @return Attribute
+     */
     public function categoriesName(): Attribute
     {
         return Attribute::make(
@@ -63,21 +101,42 @@ class Book extends Model
         );
     }
 
-    private function shortenString($string): string
+
+    /**
+     * Shortens the string if it is longer than 150 characters, appending '...'.
+     *
+     * @param string $string
+     * @return string
+     */
+    private function shortenString(string $string): string
     {
         if (strlen($string) > 150) {
+
             return substr($string, 0, 150) . '...';
         }
+
         return $string;
     }
 
-    public function scopeSearch($query, $search = '')
+    /**
+     * Adds search conditions to the query for name, author, or description fields.
+     *
+     * @param Builder $query
+     * @param string $search
+     * @return Builder
+     */
+    public function scopeSearch(Builder $query, string $search = ''): Builder
     {
         return $query->where('name', 'LIKE', '%' . $search . '%')
             ->orWhere('author', 'LIKE', '%' . $search . '%')
             ->orWhere('description', 'LIKE', '%' . $search . '%');
     }
 
+    /**
+     * Bootstrap the model and its traits
+     *
+     * @return void
+     */
     public static function boot(): void
     {
         parent::boot();

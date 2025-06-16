@@ -16,7 +16,7 @@ class BookRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get the validation rules that apply to the request for creating or updating a book.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -33,11 +33,9 @@ class BookRequest extends FormRequest
             'image' => 'file|required|mimes:jpg,png,svg,jpeg'
         ];
 
-        //
         if ($this->routeIs('books.update')) {
             $rules['image'] = 'file|mimes:jpg,png,svg,jpeg';
         }
-
 
         return $rules;
     }
