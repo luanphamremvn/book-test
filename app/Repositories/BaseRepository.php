@@ -93,9 +93,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Delete one or more model records from the database
      *
-     * @return int|false
+     * @return int|bool
      */
-    public function delete(): int|false
+    public function delete(): int|bool
     {
         $this->newQuery()->setClauses();
         // Prevent deleting all records if no where or whereIn is set

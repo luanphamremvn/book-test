@@ -61,9 +61,9 @@ abstract class BaseService
     /**
      * Delete records by conditions.
      *
-     * @return int|false
+     * @return int|bool
      */
-    public function delete(): int|false
+    public function delete(): int|bool
     {
         return $this->repository->delete();
     }
