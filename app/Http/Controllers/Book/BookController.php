@@ -46,12 +46,8 @@ class BookController extends Controller
                 'message' => $e->getMessage(),
                 'request' => $request->all(),
             ]);
-            // Return an empty view with an error message
-            return view('pages.book.index', [
-                'data' => [],
-                'categories' => [],
-                'filters' => [],
-            ])->with(['errorMessage' => 'Lỗi hệ thống, vui lòng thử lại sau']);
+
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
@@ -71,9 +67,8 @@ class BookController extends Controller
             $this->logError(LOG_CREATE_BOOK, 'Error displaying book creation page', [
                 'message' => $e->getMessage(),
             ]);
-            // Return an empty view with an error message
-            return view('pages.book.create', ['categories' => []])
-                ->with('errorMessage', 'Lỗi hệ thống, vui lòng thử lại sau');
+
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
@@ -141,8 +136,7 @@ class BookController extends Controller
             // If the book is not found, return a 404 error
             if ($e instanceof ModelNotFoundException) throw $e;
 
-            return view('pages.book.edit', ['book' => null, 'categories' => []])
-                ->with('errorMessage', 'Lỗi hệ thống, vui lòng thử lại sau');
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 

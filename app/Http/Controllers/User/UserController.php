@@ -36,10 +36,7 @@ class UserController extends Controller
                 'request' => $request->all(),
             ]);
 
-            return view('pages.user.index', [
-                'data' => [],
-                'filters' => $request->only(['q']),
-            ])->with(['errorMessage' => 'Lỗi hệ thống, vui lòng thử lại sau']);
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
