@@ -24,7 +24,6 @@ class BookFilterRequest extends FormRequest
      */
     public function rules(): array
     {
-
         return [
             'keyword' => 'nullable|string|max:255',
             'published_at' => 'nullable|date|string',

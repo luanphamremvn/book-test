@@ -21,7 +21,7 @@ class BookCategory extends Model
      *
      * @var string
      */
-    protected $primaryKey = 'id';
+    protected $primaryKey = 'book_category_id';
 
     /**
      * The attributes that are mass assignable.

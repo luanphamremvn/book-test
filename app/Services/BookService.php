@@ -15,11 +15,15 @@ use Illuminate\Http\UploadedFile;
 
 class BookService extends BaseService
 {
+
     public function __construct(
-        protected BookRepositoryInterface $repository,
+        BookRepositoryInterface $repository,
         protected BookCategoriesRepositoryInterface $bookCategories,
         protected UploadFileService $uploadFileService
-    ) {}
+    ) {
+        parent::__construct($repository);
+        $this->repository = $repository;
+    }
 
     /**
      * Get all books with pagination and filters
@@ -39,7 +43,7 @@ class BookService extends BaseService
                 'filters' => $filters
             ]);
 
-            throw new Exception('Error fetching books', $exception->getCode(), $exception);
+            throw new Exception('Error fetching books');
         }
     }
 
@@ -71,7 +75,7 @@ class BookService extends BaseService
                 'data' => $data
             ]);
 
-            throw new Exception('Error creating book', $exception->getCode(), $exception);
+            throw new Exception('Error creating book', $exception->getCode());
         }
     }
 
@@ -105,7 +109,7 @@ class BookService extends BaseService
             // If the exception is a ModelNotFoundException, set the code to 404
             if ($exception instanceof ModelNotFoundException) throw $exception;
 
-            throw new Exception('Error fetching book detail',  $code, $exception);
+            throw new Exception('Error fetching book detail',  $code);
         }
     }
 
@@ -118,7 +122,7 @@ class BookService extends BaseService
      * @return Book|null
      * @throws Exception
      */
-    public function updateBook(int $id, array $data,File|StreamInterface|UploadedFile|null $file = null): Book|null
+    public function updateBook(int $id, array $data, File|StreamInterface|UploadedFile|null $file = null): Book|null
     {
         $book = null;
 
@@ -140,7 +144,7 @@ class BookService extends BaseService
             // If the exception is a ModelNotFoundException, set the code to 404
             if ($exception instanceof ModelNotFoundException) throw $exception;
 
-            throw new Exception('Error updating book', $exception->getCode(), $exception);
+            throw new Exception('Error updating book', $exception->getCode());
         }
 
         return $book;
@@ -177,7 +181,7 @@ class BookService extends BaseService
             // If the exception is a ModelNotFoundException, set the code to 404
             if ($exception instanceof ModelNotFoundException) throw $exception;
 
-            throw new Exception('Error deleting book', $exception->getCode(), $exception);
+            throw new Exception('Error deleting book', $exception->getCode());
         }
     }
 

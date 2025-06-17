@@ -6,12 +6,16 @@ use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class UserService extends BaseService
 {
-
-    public function __construct(protected UserRepository $repository) {}
+    public function __construct(UserRepository $repository)
+    {
+        parent::__construct($repository);
+        $this->repository = $repository;
+    }
 
     /**
      * Get all users with pagination and filters
@@ -67,24 +71,17 @@ class UserService extends BaseService
     /**
      * Login user with given credentials
      *
-     * @param array $data
+     * @param array $credentials
      * @return bool|null
      * @throws Exception
      */
-    public function loginUser(array $data): bool|null
+    public function loginUser(array $credentials): bool|null
     {
         try {
-            $user = $this->repository->loginUser($data);
-
-            if (!$user) {
-                throw new Exception('Invalid credentials');
-            }
-
-            // Optionally, you can handle any additional logic after successful login
-            return $user;
+            return Auth::attempt($credentials);
         } catch (Exception $exception) {
             $this->logError(LOG_USER_LOGIN, 'Login user error', [
-                'data' => $data,
+                'credentials' => $credentials,
                 'message' => $exception->getMessage()
             ]);
 
@@ -92,7 +89,7 @@ class UserService extends BaseService
         }
     }
     /**
-     * Logout user
+     * Logout the currently authenticated user
      *
      * @return void
      * @throws Exception
@@ -100,13 +97,32 @@ class UserService extends BaseService
     public function logoutUser(): void
     {
         try {
-            $this->repository->logoutUser();
+            Auth::logout();
         } catch (Exception $exception) {
             $this->logError(LOG_USER_LOGOUT, 'Logout user error', [
                 'message' => $exception->getMessage()
             ]);
 
-            throw new Exception('Error logging out user', $exception->getCode(), $exception);
+            throw $exception;
+        }
+    }
+
+    /**
+     * Check if the user is authenticated
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function authCheck(): bool
+    {
+        try {
+            return Auth::check();
+        } catch (Exception $exception) {
+            $this->logError(LOG_USER_AUTH, 'Auth check error', [
+                'message' => $exception->getMessage()
+            ]);
+
+            throw $exception;
         }
     }
 }

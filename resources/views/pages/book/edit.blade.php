@@ -2,8 +2,21 @@
 
 @section('content')
     {{ Breadcrumbs::render('book.edit') }}
+    @if (isset($errors) && $errors->any())
+        <div class="max-w-lg mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+            role="alert">
+            <strong class="font-bold">Whoops!</strong>
+            <span class="block sm:inline">There were some problems with your input.</span>
+            <ul class="list-disc pl-5 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+
+    @endif
     @if (isset($bookDetail))
-        <form method="post" action="{{ route('books.update', ['book' => $bookDetail->id]) }}" enctype="multipart/form-data"
+        <form method="post" action="{{ route('books.update', ['book' => $bookDetail->book_id]) }}" enctype="multipart/form-data"
             class="max-w-lg mx-auto bg-white p-6">
             @csrf
             @method('PUT')

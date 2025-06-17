@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Book;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Book\BookRequest;
 use App\Http\Requests\Book\BookFilterRequest;
-use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Services\BookService;
+use App\Services\CategoryService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
@@ -16,8 +16,8 @@ use Illuminate\Contracts\View\View;
 class BookController extends Controller
 {
     public function __construct(
-        protected BookService $service,
-        protected CategoryRepositoryInterface $categoryRepository
+        protected BookService $bookService,
+        protected CategoryService $categoryService
     ) {}
 
     /**
@@ -36,13 +36,13 @@ class BookController extends Controller
                 'categories',
             ]);
 
-            $books = $this->service->getAllBook($filters);
-            $categories = $this->categoryRepository->all();
+            $books = $this->bookService->getAllBook($filters);
+            $categories = $this->categoryService->all();
 
             return view(
                 'pages.book.index',
                 [
-                    'data' => $books,
+                    'books' => $books,
                     'categories' => $categories,
                     'filters' => $filters
                 ]
@@ -53,12 +53,7 @@ class BookController extends Controller
                 'request' => $request->all(),
             ]);
 
-            // Return an empty view with an error message
-            return view('pages.book.index', [
-                'data' => [],
-                'categories' => [],
-                'filters' => [],
-            ])->with(['errorMessage' => 'Lỗi hệ thống, vui lòng thử lại sau']);
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
@@ -71,7 +66,7 @@ class BookController extends Controller
     {
         try {
             // get all categories
-            $categories = $this->categoryRepository->all();
+            $categories = $this->categoryService->all();
 
             // Return the view with categories
             return view('pages.book.create', ['categories' => $categories]);
@@ -81,9 +76,7 @@ class BookController extends Controller
                 'message' => $e->getMessage(),
             ]);
 
-            // Return an empty view with an error message
-            return view('pages.book.create', ['categories' => []])
-                ->with('errorMessage', 'Lỗi hệ thống, vui lòng thử lại sau');
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
@@ -103,9 +96,8 @@ class BookController extends Controller
                 'categories',
                 'description'
             ]);
-
             $imageFile = $request->file('image');
-            $createdBook = $this->service->createNewBook($bookData, $imageFile);
+            $createdBook = $this->bookService->createNewBook($bookData, $imageFile);
 
             if ($createdBook) {
                 return redirect()
@@ -123,9 +115,7 @@ class BookController extends Controller
                 'data' => $request->all(),
             ]);
 
-            return redirect()
-                ->back()
-                ->with('success', "Create Book Error!, Please create again");
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
@@ -138,8 +128,8 @@ class BookController extends Controller
     public function show(string $id): View
     {
         try {
-            $bookDetail = $this->service->getBookDetail($id);
-            $categories = $this->categoryRepository->all();
+            $bookDetail = $this->bookService->getBookDetail($id);
+            $categories = $this->categoryService->all();
 
             return view('pages.book.edit', [
                 'bookDetail' => $bookDetail,
@@ -155,8 +145,7 @@ class BookController extends Controller
             // If the book is not found, return a 404 error
             if ($exception instanceof ModelNotFoundException) throw $exception;
 
-            return view('pages.book.edit', ['bookDetail' => null, 'categories' => []])
-                ->with('errorMessage', 'Lỗi hệ thống, vui lòng thử lại sau');
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
@@ -181,7 +170,7 @@ class BookController extends Controller
             $imageFile = $request->file('image');
 
             // update book
-            $updatedBook = $this->service->updateBook($id, $bookData, $imageFile);
+            $updatedBook = $this->bookService->updateBook($id, $bookData, $imageFile);
             if ($updatedBook) {
                 return redirect()
                     ->route('books.show', ['book' => $id])
@@ -202,10 +191,7 @@ class BookController extends Controller
             // If the book is not found, return a 404 error
             if ($exception instanceof ModelNotFoundException) throw $exception;
 
-            // Return an error message
-            return redirect()
-                ->back()
-                ->with('error', "Lỗi hệ thống, Cập nhật sách thất bại! Vui lòng thử lại sau");
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 
@@ -218,7 +204,7 @@ class BookController extends Controller
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $deletedBookSuccess = $this->service->deleteBook($id);
+            $deletedBookSuccess = $this->bookService->deleteBook($id);
 
             if ($deletedBookSuccess) {
                 return redirect()
@@ -242,9 +228,7 @@ class BookController extends Controller
             if ($exception instanceof ModelNotFoundException) throw $exception;
 
             // Return an error message
-            return redirect()
-                ->back()
-                ->with('error', 'Hệ thống đang lỗi, Xoá sách thất bại! vui lòng thử lại sau');
+            abort(500, 'Hệ thống đang lỗi, Xoá sách thất bại! vui lòng thử lại sau');
         }
     }
 }

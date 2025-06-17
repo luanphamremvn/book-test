@@ -16,25 +16,24 @@ class BookRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request for creating or updating a book.
+     * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
-
         $rules = [
             'name' => 'string|required|min:3|max:255',
             'author' => 'string|required|min:3|max:50',
             'published_at' => 'date|required',
             'categories' => 'array|required|min:1',
-            'categories.*' => 'exists:categories,id',
+            'categories.*' => 'exists:categories,category_id',
             'description' => 'string|required|min:20|max:2500',
             'image' => 'file|required|mimes:jpg,png,svg,jpeg'
         ];
 
         if ($this->routeIs('books.update')) {
-            $rules['image'] = 'file|mimes:jpg,png,svg,jpeg';
+            $rules['image'] = 'nullable|file|mimes:jpg,png,svg,jpeg';
         }
 
         return $rules;

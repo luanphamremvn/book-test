@@ -24,10 +24,10 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
      * Create a new book and its categories.
      *
      * @param array $data
-     * @return Model|string|Exception
+     * @return Model|string
      * @throws Exception
      */
-    public function createBook(array $data): Model|string|Exception
+    public function createBook(array $data): Model|string
     {
         DB::beginTransaction();
 
@@ -38,7 +38,7 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
             //create book categories
             if ($book instanceof Book) {
                 $categories = isset($data["categories"]) ? $data["categories"] : [];
-                $this->bookCategories->createByBookId($book->id, $categories);
+                $this->bookCategories->createByBookId($book->book_id, $categories);
             }
 
             // commit transaction
@@ -63,11 +63,11 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
      *  Get all books with optional filters and status.
      *
      * @param array $filters
-     * @param mixed $status
+     * @param string $status
      * @return LengthAwarePaginator
      * @throws Exception
      */
-    public function getAllBookQuery(array $filters = [], $status = BookStatusEnum::ACTIVE->value): LengthAwarePaginator
+    public function getAllBookQuery(array $filters = [], string $status = BookStatusEnum::ACTIVE->value): LengthAwarePaginator
     {
         try {
             return $this->model
@@ -122,9 +122,10 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
             //update book categories
             if ($book instanceof Book) {
                 $categories = isset($data["categories"]) ? $data["categories"] : [];
+
                 // delete old categories and create new categories
-                $this->bookCategories->deleteByBookId($book->id, $categories);
-                $this->bookCategories->createByBookId($book->id, $categories);
+                $this->bookCategories->deleteByBookId($book->book_id, $categories);
+                $this->bookCategories->createByBookId($book->book_id, $categories);
             }
 
             return $book;
@@ -133,6 +134,7 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
                 'message' => $exception->getMessage(),
                 'data' => $data
             ]);
+
             // rethrow the exception
             throw $exception;
         }
@@ -141,10 +143,10 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
     /**
      * Check if a given value is a valid date string.
      *
-     * @param mixed $date The value to check.
+     * @param string $date The value to check.
      * @return bool True if valid date, false otherwise.
      */
-    private function isValidDate(mixed $date): bool
+    private function isValidDate(string $date): bool
     {
         if (!is_string($date) && !is_numeric($date)) {
             return false;

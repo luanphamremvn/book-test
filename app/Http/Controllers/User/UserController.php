@@ -17,18 +17,19 @@ class UserController extends Controller
     public function __construct(protected UserService $userService) {}
     /**
      * show the list of users
+     *
      * @param UserFilterRequest $request
-     * @return View
+     * @return View|Application|Factory
      * @throws Exception
      */
-    public function index(UserFilterRequest $request): View
+    public function index(UserFilterRequest $request): View|Application|Factory
     {
         try {
             $filters = $request->only(['keyword']);
             $users = $this->userService->getAllUser($filters);
 
             return view('pages.user.index', [
-                'data' => $users,
+                'users' => $users,
                 'filters' => $filters
             ]);
         } catch (Exception $exception) {
@@ -38,10 +39,7 @@ class UserController extends Controller
                 'request' => $request->all(),
             ]);
 
-            return view('pages.user.index', [
-                'users' => [],
-                'filters' => $request->only(['keyword']),
-            ])->with(['errorMessage' => 'Lỗi hệ thống, vui lòng thử lại sau']);
+            abort(500, 'Lỗi hệ thống, vui lòng thử lại sau');
         }
     }
 

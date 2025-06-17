@@ -27,7 +27,7 @@ interface BaseRepositoryInterface
 
     public function where(string $column,string $value,string $operator = '='): static;
 
-    public function whereIn(string $column, mixed $values): static;
+    public function whereIn(string $column, array $values): static;
 
     public function orderBy(string $column, string $direction = 'asc'): static;
 

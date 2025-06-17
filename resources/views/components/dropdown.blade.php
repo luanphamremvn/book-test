@@ -11,16 +11,16 @@
 <div id="dropdownBgHover" class="z-[9999] hidden bg-white rounded-lg shadow-sm w-full">
     <ul class="p-3 space-y-1 text-sm text-gray-700 w-full" aria-labelledby="dropdownBgHoverButton">
         @foreach ($options as $option)
-            <li>
-                <div class="flex  items-center p-2 rounded-sm hover:bg-gray-100 ">
+        <li>
+            <div class="flex  items-center p-2 rounded-sm hover:bg-gray-100 ">
 
-                    <input id="checkbox-item-{{ $name . '-' . $option?->id }}" name="{{ $name }}[]"
-                        type="checkbox" value="{{ $option?->id }}"
-                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
-                        @checked(in_array($option->id, @$selected ?? []))>
+                <input id="checkbox-item-{{ $name . '-' . $option?->category_id }}" name="{{ $name }}[]"
+                    type="checkbox" value="{{ $option?->category_id }}"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
+                    @checked(in_array($option->id, @$selected ?? []))>
 
-                    <label for="checkbox-item-{{ $name . '-' . $option?->id }}"
-                        class="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm" ">{{ $option?->name }}</label>
+                <label for="checkbox-item-{{ $name . '-' . $option?->category_id }}"
+                    class="w-full ms-2 text-sm font-medium text-gray-900 rounded-sm" ">{{ $option?->name }}</label>
                         </div>
                     </li>
  @endforeach

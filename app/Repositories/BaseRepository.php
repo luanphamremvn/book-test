@@ -208,10 +208,10 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * Add a simple where in clause to the query
      *
      * @param string $column
-     * @param array|mixed  $values
+     * @param array $values
      * @return $this
      */
-    public function whereIn(string $column, mixed $values): static
+    public function whereIn(string $column, array $values): static
     {
         $values = is_array($values) ? $values : array($values);
         $this->whereIns[] = compact('column', 'values');

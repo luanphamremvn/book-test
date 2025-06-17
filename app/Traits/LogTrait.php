@@ -6,7 +6,6 @@ use Exception;
 
 trait LogTrait
 {
-
     /**
      * log error message
      *

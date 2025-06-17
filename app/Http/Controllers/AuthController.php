@@ -8,17 +8,11 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
+use App\Services\UserService;
 
 class AuthController extends Controller
 {
-    /**
-     * AuthController constructor.
-     */
-    public function __construct(protected \App\Services\UserService $userService)
-    {
-
-    }
+    public function __construct(protected UserService $userService) {}
 
     /**
      * Show login page
@@ -30,7 +24,7 @@ class AuthController extends Controller
     {
         try {
             // Check if the user is already authenticated
-            if (Auth::check()) {
+            if ($this->userService->authCheck()) {
                 return redirect()->route('books.index');
             }
         } catch (Exception $exception) {
@@ -70,14 +64,12 @@ class AuthController extends Controller
                 'data' => $request->all()
             ]);
 
-            return redirect()->back()->withErrors([
-                'errorMessage' => 'Đã xây ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website'
-            ]);
+            abort(500, 'Đã xảy ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website');
         }
     }
 
     /**
-     * Logout user
+     * Logout the currently authenticated user
      *
      * @return RedirectResponse
      * @throws Exception
@@ -95,10 +87,7 @@ class AuthController extends Controller
                 'message' => $exception->getMessage()
             ]);
 
-            // Redirect back with an error message
-            return redirect()->back()->withErrors([
-                'errorMessage' => 'Đã xảy ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website'
-            ]);
+            abort(500, 'Đã xảy ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website');
         }
     }
 }
