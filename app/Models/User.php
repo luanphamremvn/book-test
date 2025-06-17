@@ -2,16 +2,30 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'users';
+
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'id';
 
     /**
      * The attributes that are mass assignable.
@@ -48,7 +62,14 @@ class User extends Authenticatable
         ];
     }
 
-    public function scopeSearch($query, $search = '')
+    /**
+     * Scope a query to search users by name, username, or email.
+     *
+     * @param Builder $query
+     * @param string $search
+     * @return Builder
+     */
+    public function scopeSearch(Builder $query,string $search = ''):Builder
     {
         return $query->where('name', 'LIKE', '%' . $search . '%')
             ->orWhere('username', 'LIKE', '%' . $search . '%')

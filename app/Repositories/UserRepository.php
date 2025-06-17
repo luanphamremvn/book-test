@@ -9,37 +9,36 @@ use App\Models\User;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
-
     public function __construct()
     {
         $this->model = app(User::class);
     }
 
-
     /**
      * Get all users with optional filters
      *
-     * @param mixed $filters
+     * @param array $filters
      * @return LengthAwarePaginator
      * @throws Exception
      */
-    public function getAllUser($filters = []): LengthAwarePaginator
+    public function getAllUser(array $filters = []): LengthAwarePaginator
     {
         try {
             // Apply filters if provided
             return $this->model
                 ->query()
-                ->when(isset($filters['q']), function ($query) use ($filters) {
-                    return $query->search($filters['q']);
+                ->when(isset($filters['keyword']), function ($query) use ($filters) {
+                    return $query->search($filters['keyword']);
                 })
                 ->paginate(PAGINATION_PER_PAGE);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             // Log the error message
             $this->logError(LOG_GET_ALL_USER, 'Get all users error', [
                 'filters' => $filters,
-                'message' => $e->getMessage()
+                'message' => $exception->getMessage()
             ]);
-            throw $e;
+
+            throw $exception;
         }
     }
 }

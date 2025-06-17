@@ -8,75 +8,86 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
+use App\Services\UserService;
 
 class AuthController extends Controller
 {
+    public function __construct(protected UserService $userService) {}
+
     /**
-     * login page
+     * Show login page
+     *
      * @return Factory|Application|View|RedirectResponse
+     * @throws Exception
      */
     public function login(): Factory|Application|View|RedirectResponse
     {
         try {
             // Check if the user is already authenticated
-            if (Auth::check()) {
+            if ($this->userService->authCheck()) {
                 return redirect()->route('books.index');
             }
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             $this->logError(LOG_USER_LOGIN, 'Error login page', [
-                'message' => $e->getMessage()
+                'message' => $exception->getMessage()
             ]);
         }
+
         // If not authenticated, show the login page
         return view('pages.auth.login');
     }
 
     /**
-     * check login information
+     * Authenticate user
+     *
      * @param LoginRequest $request
      * @return RedirectResponse
+     * @throws Exception
      */
     public function authenticate(LoginRequest $request): RedirectResponse
     {
         try {
-            $certificate = $request->only(['username', 'password']);
-            if (Auth::attempt($certificate)) {
+            $credentials = $request->only(['username', 'password']);
+
+            if ($this->userService->loginUser($credentials)) {
                 return redirect()->route('books.index')->with('success', 'Đăng nhập thành công');
-            } else {
-                return redirect()->back()->withErrors([
-                    'errorMessage' => 'Tên tài khoản hoặc mật khẩu không chính xác!'
-                ]);
             }
-        } catch (Exception $e) {
+
+            // If authentication fails, redirect back with an error message
+            return redirect()->back()->withErrors([
+                'errorMessage' => 'Tên tài khoản hoặc mật khẩu không chính xác!'
+            ]);
+        } catch (Exception $exception) {
             // Log the error message
             $this->logError(LOG_USER_LOGIN, 'Error authenticate user', [
-                'message' => $e->getMessage(),
+                'message' => $exception->getMessage(),
                 'data' => $request->all()
             ]);
-            return redirect()->back()->withErrors([
-                'errorMessage' => 'Đã xây ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website'
-            ]);
+
+            abort(500, 'Đã xảy ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website');
         }
     }
 
     /**
-     * logout user
+     * Logout the currently authenticated user
+     *
      * @return RedirectResponse
+     * @throws Exception
      */
     public function logout(): RedirectResponse
     {
         try {
-            Auth::logout();
+            // Attempt to log out the user
+            $this->userService->logoutUser();
+
             return redirect()->route('login')->with('success', 'Đăng xuất thành công');
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             // Log the error message
             $this->logError(LOG_USER_LOGOUT, 'Error logout user', [
-                'message' => $e->getMessage()
+                'message' => $exception->getMessage()
             ]);
-            return redirect()->back()->withErrors([
-                'errorMessage' => 'Đã xảy ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website'
-            ]);
+
+            abort(500, 'Đã xảy ra lỗi hệ thống vui lòng thử lại sau hoặc liên hệ với quản lý website');
         }
     }
 }

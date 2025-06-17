@@ -8,19 +8,26 @@ class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
+     *
+     * @return void
      */
     public function register(): void
     {
-
-        $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-        $loader->alias('Debugbar', \Barryvdh\Debugbar\Facades\Debugbar::class);
+        // Only register Debugbar alias if the package exists and environment is not production
+        if (
+            $this->app->environment(['local', 'staging']) &&
+            class_exists(\Barryvdh\Debugbar\Facades\Debugbar::class)
+        ) {
+            /** @var \Illuminate\Foundation\AliasLoader $loader */
+            $loader = \Illuminate\Foundation\AliasLoader::getInstance();
+            $loader->alias('Debugbar', \Barryvdh\Debugbar\Facades\Debugbar::class);
+        }
     }
 
     /**
      * Bootstrap any application services.
+     *
+     * @return void
      */
-    public function boot(): void
-    {
-
-    }
+    public function boot(): void {}
 }
